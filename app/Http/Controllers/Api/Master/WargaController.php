@@ -20,7 +20,7 @@ class WargaController extends Controller
                 })
                 ->when(request('q'), function ($q) {
                     $q->where('name', 'like', '%' . request('q') . '%')
-                    ->orWhere('nik', 'like', '%' . request('q') . '%');
+                    ->orWhere('nokk', 'like', '%' . request('q') . '%');
                 })
                 ->get();
         return new JsonResource($data);
@@ -30,28 +30,28 @@ class WargaController extends Controller
     {
         $validate = $request->validate([
             'nama' => 'required|string',
-            'nik' => 'required|string',
+            'nokk' => 'required|string',
             // 'username' => 'required|string',
             // 'email' => 'required|email',
             // 'password' => 'required|string',
         ],[
             'nama.required' => 'Nama Harus Di isi.',
-            'nik.required' => 'No. KTP Harus Di isi.',
+            'nokk.required' => 'No. KK Harus Di isi.',
         ]);
 
         try {
             DB::beginTransaction();
-            $email = $validate['nik'] . '@warga.com';
+            $email = date('YmdHis') . '@warga.com';
 
             $user = User::updateOrCreate([
                 'id' => $request->id,
             ],[
                 'name' => $validate['nama'],
                 'email' => $email,
-                'nik' => $validate['nik'],
+                'nokk' => $validate['nokk'],
                 // 'username' => $validate['nik'],
-                'password' => bcrypt($validate['nik']),
-                'pass' => $validate['nik'],
+                'password' => bcrypt($validate['nokk']),
+                'pass' => $validate['nokk'],
             ]);
 
             DB::commit();

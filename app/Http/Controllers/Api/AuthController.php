@@ -28,32 +28,29 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        $menus = Menus::with(['submenus' => function ($q) {
-            $q->orderBy('urut');
-        }])
-        ->orderBy('urut')
+        $menuItems = Menus::orderBy('urut')
         ->get();
 
-        $menuItems = $menus->map(function ($menu) {
-            $item = [
-                'label' => $menu->label,
-                'icon' => $menu->icon,
-            ];
+        // $menuItems = $menus->map(function ($menu) {
+        //     $item = [
+        //         'label' => $menu->label,
+        //         'icon' => $menu->icon,
+        //     ];
 
-            if ($menu->submenus->isNotEmpty()) {
-                $item['children'] = $menu->submenus->map(function ($sub) {
-                    return [
-                        'label' => $sub->label,
-                        'icon' => $sub->icon,
-                        'to' => $sub->link,
-                    ];
-                });
-            } else {
-                $item['to'] = $menu->link ?? '/';
-            }
+        //     if ($menu->submenus->isNotEmpty()) {
+        //         $item['children'] = $menu->submenus->map(function ($sub) {
+        //             return [
+        //                 'label' => $sub->label,
+        //                 'icon' => $sub->icon,
+        //                 'to' => $sub->link,
+        //             ];
+        //         });
+        //     } else {
+        //         $item['to'] = $menu->link ?? '/';
+        //     }
 
-            return $item;
-        });
+        //     return $item;
+        // });
 
         return response()->json([
             'status' => true,
