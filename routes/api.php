@@ -5,6 +5,7 @@ use App\Events\UserMessage;
 use App\Helpers\Routes\RouteHelper;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TestnotifController;
+use App\Http\Controllers\CuacaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 
 Route::get('/testnotif', [TestnotifController::class, 'index']);
 
