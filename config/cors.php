@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
     'allowed_origins' => ['*'], // bisa diganti ['http://localhost:9200'] jika mau lebih spesifik
     'allowed_origins_patterns' => [],

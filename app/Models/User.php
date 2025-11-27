@@ -24,7 +24,8 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'nokk',
-        'pass'
+        'pass',
+        'flaging',
     ];
 
     /**
@@ -49,6 +50,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTIdentifier()
     {
         return $this->getKey();
+    }
+    public function rincian()
+    {
+        return $this->hasMany(Userrinci::class, 'id_heder', 'id');
     }
 
     public function getJWTCustomClaims()

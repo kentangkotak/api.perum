@@ -56,6 +56,16 @@ return [
             'throw' => false,
         ],
 
+        'sftp_storage' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_HOST', '192.168.33.105'),
+            'username' => env('SFTP_USERNAME', 'root'),
+            'password' => env('SFTP_PASSWORD', 'sasa0102'),
+            'port' => (int) env('SFTP_PORT', 22),
+            'root' => '/www/wwwroot/storage',// folder tujuan di CT storage
+            'timeout' => 30,
+        ],
+
     ],
 
     /*
