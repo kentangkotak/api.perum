@@ -169,10 +169,12 @@ class WargaController extends Controller
     {
         $validate = $request->validate([
             'id' => 'required',
+            'id_heder' => 'required',
             'foto' => 'required',
             'path' => 'required',
         ],[
             'id.required' => 'ID Harus Di isi.',
+            'id_heder.required' => 'ID Heder Todak Boleh Kosong.',
             'foto.required' => 'Tidak Ada Foto Untuk Dihapus.',
             'path.required' => 'Tidak Ada Path Untuk Dihapus.',
         ]);
@@ -192,11 +194,11 @@ class WargaController extends Controller
             $data->delete();
 
             DB::commit();
-
+            $respon = self::getlistbyid($validate['id_heder']);
             return new JsonResponse([
                 'status' => true,
                 'message' => 'Data berhasil dihapus',
-                'id' => $validate['id'],
+                'data' => $respon,
             ], 200);
 
         } catch (\Throwable $th) {
@@ -206,6 +208,15 @@ class WargaController extends Controller
                 'message' => $th->getMessage(),
             ], 500);
         }
+    }
+
+    public static function getlistbyid($id)
+    {
+        $data = User::whereNull('flaging')
+                ->with('rincian')
+                ->where('id', $id)
+                ->first();
+        return $data;
     }
 
 }
