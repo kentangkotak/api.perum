@@ -15,13 +15,22 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['*'],   // WAJIB, agar file statis juga diizinkan
+
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'], // bisa diganti ['http://localhost:9200'] jika mau lebih spesifik
+
+    'allowed_origins' => ['*'],
+    // ATAU lebih aman:
+    // 'allowed_origins' => ['http://localhost:9200'],
+
     'allowed_origins_patterns' => [],
+
     'allowed_headers' => ['*'],
-    'exposed_headers' => ['Authorization'], // optional, kalau mau lihat token di response header
+
+    'exposed_headers' => ['Authorization'],
+
     'max_age' => 0,
+
     'supports_credentials' => false,
 
 ];

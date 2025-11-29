@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use phpseclib3\Net\SFTP;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class WargaController extends Controller
 {
@@ -127,17 +129,32 @@ class WargaController extends Controller
                     $filename = $validate['noktp'] . '.' . $ext;
 
                     $folder = 'perumbi/' . $validate['id_heder'];
-                    // Storage::disk('sftp_storage')->putFileAs('', $file, $filename);
-                    Storage::disk('sftp_storage')->put("$folder/{$filename}", file_get_contents($file));
+                    // if (!Storage::disk('sftp_storage')->exists($folder)) {
+                       $sftp = new SFTP('192.168.33.105');
+                        if (!$sftp->login('root', 'sasa0102')) {
+                            throw new \Exception('Login failed');
+                        }
 
-                    $data['foto'] = 'https://perumbi.udumbara.my.id/'.$folder.'/'.$filename;
+                        $folder = '/www/wwwroot/storage/perumbi/' . $validate['id_heder'];
+                        if (!$sftp->is_dir($folder)) {
+                            $sftp->mkdir($folder, 0755, true);
+                        }
+
+                        $sftp->put("$folder/$filename", file_get_contents($file));
+                    // }
+                    // Storage::disk('sftp_storage')->put("$folder/{$filename}", file_get_contents($file));
+
+                    $data['foto'] = 'https://perumbi.udumbara.my.id/perumbi/'.$validate['id_heder'].'/'.$filename;
+                    $data['path'] = 'perumbi/'.$validate['id_heder'].'/'.$filename;
                 }
+
                 $simpan = Userrinci::create($data);
             DB::commit();
+            $result = Userrinci::find($simpan->id);
             return new JsonResource([
                 'status' => true,
                 'message' => 'Data berhasil disimpan',
-                'data' => $simpan,
+                'data' => $result,
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -147,4 +164,48 @@ class WargaController extends Controller
             ], 500);
         }
     }
+
+    public function hapusrinci(Request $request)
+    {
+        $validate = $request->validate([
+            'id' => 'required',
+            'foto' => 'required',
+            'path' => 'required',
+        ],[
+            'id.required' => 'ID Harus Di isi.',
+            'foto.required' => 'Tidak Ada Foto Untuk Dihapus.',
+            'path.required' => 'Tidak Ada Path Untuk Dihapus.',
+        ]);
+        try {
+            DB::beginTransaction();
+
+            // Ambil data userrinci
+            $data = Userrinci::find($validate['id']);
+
+            // Hapus file foto di storage
+            // Contoh: storage/app/public/perumbi/xxx.jpg
+            if (Storage::disk('sftp_storage')->exists($validate['path'])) {
+                Storage::disk('sftp_storage')->delete($validate['path']);
+            }
+
+            // Hapus record di database
+            $data->delete();
+
+            DB::commit();
+
+            return new JsonResponse([
+                'status' => true,
+                'message' => 'Data berhasil dihapus',
+                'id' => $validate['id'],
+            ], 200);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return new JsonResponse([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
 }

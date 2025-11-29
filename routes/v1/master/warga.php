@@ -10,6 +10,6 @@ Route::group([
     Route::get('/get-warga', [WargaController::class, 'getlist']);
     Route::post('/simpan', [WargaController::class, 'store']);
     Route::post('/hapus', [WargaController::class, 'hapus']);
-     Route::post('/simpanrinci', [WargaController::class, 'storerinci']);
-
+    Route::post('/simpanrinci', [WargaController::class, 'storerinci']);
+    Route::post('/hapusrinci', [WargaController::class, 'hapusrinci']);
 });
