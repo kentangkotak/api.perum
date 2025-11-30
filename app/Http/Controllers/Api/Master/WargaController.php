@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hakakses;
+use App\Models\Menus;
 use App\Models\User;
 use App\Models\Userrinci;
 use Illuminate\Http\Request;
@@ -67,7 +69,7 @@ class WargaController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json([
+            return new JsonResponse([
                 'status' => false,
                 'message' => $th->getMessage(),
             ], 500);
@@ -217,6 +219,90 @@ class WargaController extends Controller
                 ->where('id', $id)
                 ->first();
         return $data;
+    }
+
+    public function caridatawarga(Request $request)
+    {
+        $data = User::select('id', 'name', 'nokk')
+                ->whereNull('flaging')
+                ->where('nokk', $request->nokk)
+                ->first();
+        if ($data) {
+            return new JsonResource([
+                'status' => true,
+                'message' => 'Data ditemukan',
+                'data' => $data,
+            ]);
+        }else{
+            return new JsonResource([
+                'status' => false,
+                'message' => 'Data tidak ditemukan',
+            ]);
+        }
+
+    }
+
+    public function register(Request $request)
+    {
+        $validate = $request->validate([
+            'nokk' => 'required',
+            'username' => 'required',
+            'password' => 'required',
+            'confirmpassword' => 'required|same:password',
+        ],[
+            'nokk.required' => 'No. KK Harus Di isi.',
+            'username.required' => 'Username Harus Di isi.',
+            'password.required' => 'Password Harus Di isi.',
+            'confirmpassword.required' => 'Konfirmasi Password Harus Di isi.',
+            'confirmpassword.same' => 'Konfirmasi Password tidak sama.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // cari user berdasarkan nokk
+            $cari = User::where('username', $validate['username'])->first();
+
+            if ($cari) {
+                return new JsonResponse([
+                    'status' => false,
+                    'message' => 'Username sudah digunakan',
+                ], 404);
+            }
+
+            // update user
+            $user = User::where('nokk', $validate['nokk'])->first();
+            $user->update([
+                'username' => $validate['username'],
+                'password' => bcrypt($validate['password']),
+                'pass' => $validate['password'],
+            ]);
+
+            Hakakses::where('idwarga', $user->id)->delete();
+            $menu = Menus::where('warga', '1')->get();
+            foreach ($menu as $key => $value) {
+                Hakakses::create([
+                    'idwarga' => $user->id,
+                    'idmenu' => $value->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data berhasil disimpan',
+                'data' => $user,
+            ], 200);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
     }
 
 }

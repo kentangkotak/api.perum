@@ -15,4 +15,9 @@ class Menus extends Model
     {
         return $this->hasMany(Submenus::class, 'menu_id', 'id');
     }
+
+    public function hakakses()
+    {
+        return $this->hasMany(Hakakses::class, 'idmenu', 'id');
+    }
 }

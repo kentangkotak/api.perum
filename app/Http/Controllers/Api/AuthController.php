@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hakakses;
 use App\Models\Menus;
 use App\Models\User;
+use App\Models\Userrinci;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -27,9 +29,17 @@ class AuthController extends Controller
         }
 
         $user = auth()->user();
-
-        $menuItems = Menus::orderBy('urut')
+        $rincian = Userrinci::where('id_heder', $user->id)
         ->get();
+        if($user->name == 'Programer'){
+            $menuItems = Menus::orderBy('urut')
+            ->get();
+        }else{
+            $menuItems = Hakakses::join('admin_menus', 'admin_menus.id', '=', 'hakakses.idmenu')
+            ->where('idwarga', $user->id)
+            ->orderBy('urut')
+            ->get();
+        }
 
         // $menuItems = $menus->map(function ($menu) {
         //     $item = [
@@ -58,6 +68,7 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user,
             'menu' => $menuItems,
+            'rincian' => $rincian,
         ]);
     }
 }
