@@ -36,9 +36,10 @@ class AuthController extends Controller
             ->get();
         }else{
             $menuItems = Hakakses::join('admin_menus', 'admin_menus.id', '=', 'hakakses.idmenu')
-            ->where('idwarga', $user->id)
+            ->where('hakakses.idwarga', $user->id)
             ->orderBy('urut')
             ->get();
+            // return $menuItems;
         }
 
         // $menuItems = $menus->map(function ($menu) {
