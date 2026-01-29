@@ -57,8 +57,8 @@ class WargaController extends Controller
                 'email' => $email,
                 'nokk' => $validate['nokk'],
                 // 'username' => $validate['nik'],
-                'password' => bcrypt($validate['nokk']),
-                'pass' => $validate['nokk'],
+                // 'password' => bcrypt($validate['nokk']),
+                // 'pass' => $validate['nokk'],
             ]);
 
             DB::commit();
