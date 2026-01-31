@@ -104,66 +104,153 @@ class WargaController extends Controller
     }
     public function storerinci(Request $request)
     {
-        $validate = $request->validate([
-            'id_heder' => 'required',
-            'nama' => 'required',
-            'noktp' => 'required',
-            'foto' => 'nullable|file|mimes:jpg,jpeg,png|max:512',
-        ],[
-            'id_heder.required' => 'Warga Harus Di isi.',
-            'nama.required' => 'Nama Harus Di isi.',
-            'noktp.required' => 'No. KTP Harus Di isi.',
-            'foto.mimes' => 'Foto hanya boleh berupa file JPG, JPEG, atau PNG.',
-            'foto.max' => 'Ukuran foto maksimal 512 KB.',
-        ]);
-        try {
-            DB::beginTransaction();
-            $data =
-                [
-                    'id_heder' => $validate['id_heder'],
-                    'nama' => $validate['nama'],
-                    'noktp' => $validate['noktp'],
-                    'foto' => $validate['foto'],
-                ];
-                if ($request->hasFile('foto')) {
-                    $file = $request->file('foto');
-                    $ext = $file->getClientOriginalExtension();
-                    $filename = $validate['noktp'] . '.' . $ext;
+        if($request->jenis === "Kartu Keluarga"){
 
-                    $folder = 'perumbi/' . $validate['id_heder'];
-                    // if (!Storage::disk('sftp_storage')->exists($folder)) {
-                       $sftp = new SFTP('192.168.33.105');
-                        if (!$sftp->login('root', 'sasa0102')) {
-                            throw new \Exception('Login failed');
+            $validate = $request->validate([
+                'id_heder' => 'required',
+                'nokk' => 'required',
+                'jenis' => 'required',
+                'foto' => 'nullable|file|mimes:jpg,jpeg,png|max:1024',
+            ],[
+                'id_heder.required' => 'Warga Harus Di isi.',
+                'nokk.required' => 'No. KK Harus Di isi.',
+                'jenis.required' => 'Jenis Dokumen Harus Di isi.',
+                'foto.mimes' => 'Foto hanya boleh berupa file JPG, JPEG, atau PNG.',
+                'foto.max' => 'Ukuran foto maksimal 1 MB.',
+            ]);
+
+            try {
+                $cek = Userrinci::where('id_heder', $validate['id_heder'])->where('noktp', $validate['nokk'])->count();
+                if($cek > 0){
+                    return new JsonResource([
+                        'status' => false,
+                        'message' => 'Data sudah ada.',
+                    ], 200);
+                }else{
+                    DB::beginTransaction();
+                    $data =
+                        [
+                            'id_heder' => $validate['id_heder'],
+                            'noktp' => $validate['nokk'],
+                            'nama' => '',
+                            'jenisdok' => $validate['jenis'],
+                            'foto' => $validate['foto'],
+                        ];
+                        if ($request->hasFile('foto')) {
+                            $file = $request->file('foto');
+                            $ext = $file->getClientOriginalExtension();
+                            $filename = $validate['nokk'] . '.' . $ext;
+
+                            $folder = 'perumbi/' . $validate['id_heder'];
+                            // if (!Storage::disk('sftp_storage')->exists($folder)) {
+                            $sftp = new SFTP('192.168.33.105');
+                                if (!$sftp->login('root', 'sasa0102')) {
+                                    throw new \Exception('Login failed');
+                                }
+
+                                $folder = '/www/wwwroot/storage/perumbi/' . $validate['id_heder'];
+                                if (!$sftp->is_dir($folder)) {
+                                    $sftp->mkdir($folder, 0755, true);
+                                }
+
+                                $sftp->put("$folder/$filename", file_get_contents($file));
+                            // }
+                            // Storage::disk('sftp_storage')->put("$folder/{$filename}", file_get_contents($file));
+
+                            $data['foto'] = 'https://perumbi.udumbara.my.id/perumbi/'.$validate['id_heder'].'/'.$filename;
+                            $data['path'] = 'perumbi/'.$validate['id_heder'].'/'.$filename;
                         }
 
-                        $folder = '/www/wwwroot/storage/perumbi/' . $validate['id_heder'];
-                        if (!$sftp->is_dir($folder)) {
-                            $sftp->mkdir($folder, 0755, true);
-                        }
-
-                        $sftp->put("$folder/$filename", file_get_contents($file));
-                    // }
-                    // Storage::disk('sftp_storage')->put("$folder/{$filename}", file_get_contents($file));
-
-                    $data['foto'] = 'https://perumbi.udumbara.my.id/perumbi/'.$validate['id_heder'].'/'.$filename;
-                    $data['path'] = 'perumbi/'.$validate['id_heder'].'/'.$filename;
+                        $simpan = Userrinci::create($data);
+                    DB::commit();
+                    $result = Userrinci::find($simpan->id);
+                    return new JsonResource([
+                        'status' => true,
+                        'message' => 'Data berhasil disimpan',
+                        'data' => $result,
+                    ], 200);
                 }
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                ], 500);
+            }
+        }else{
+            $validate = $request->validate([
+                'id_heder' => 'required',
+                'nama' => 'required',
+                'noktp' => 'required',
+                'jenis' => 'required',
+                'foto' => 'nullable|file|mimes:jpg,jpeg,png|max:512',
+            ],[
+                'id_heder.required' => 'Warga Harus Di isi.',
+                'nama.required' => 'Nama Harus Di isi.',
+                'noktp.required' => 'No. KTP Harus Di isi.',
+                'jenis.required' => 'Jenis Dokumen Harus Di isi.',
+                'foto.mimes' => 'Foto hanya boleh berupa file JPG, JPEG, atau PNG.',
+                'foto.max' => 'Ukuran foto maksimal 512 KB.',
+            ]);
 
-                $simpan = Userrinci::create($data);
-            DB::commit();
-            $result = Userrinci::find($simpan->id);
-            return new JsonResource([
-                'status' => true,
-                'message' => 'Data berhasil disimpan',
-                'data' => $result,
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-            ], 500);
+            try {
+                $cek = Userrinci::where('id_heder', $validate['id_heder'])->where('noktp', $validate['noktp'])->count();
+                if($cek > 0){
+                    return new JsonResource([
+                        'status' => false,
+                        'message' => 'Data sudah ada.',
+                    ], 200);
+                }else{
+                DB::beginTransaction();
+                    $data =
+                        [
+                            'id_heder' => $validate['id_heder'],
+                            'nama' => $validate['nama'],
+                            'noktp' => $validate['noktp'],
+                            'jenisdok' => $validate['jenis'],
+                            'foto' => $validate['foto'],
+                        ];
+                        if ($request->hasFile('foto')) {
+                            $file = $request->file('foto');
+                            $ext = $file->getClientOriginalExtension();
+                            $filename = $validate['noktp'] . '.' . $ext;
+
+                            $folder = 'perumbi/' . $validate['id_heder'];
+                            // if (!Storage::disk('sftp_storage')->exists($folder)) {
+                            $sftp = new SFTP('192.168.33.105');
+                                if (!$sftp->login('root', 'sasa0102')) {
+                                    throw new \Exception('Login failed');
+                                }
+
+                                $folder = '/www/wwwroot/storage/perumbi/' . $validate['id_heder'];
+                                if (!$sftp->is_dir($folder)) {
+                                    $sftp->mkdir($folder, 0755, true);
+                                }
+
+                                $sftp->put("$folder/$filename", file_get_contents($file));
+                            // }
+                            // Storage::disk('sftp_storage')->put("$folder/{$filename}", file_get_contents($file));
+
+                            $data['foto'] = 'https://perumbi.udumbara.my.id/perumbi/'.$validate['id_heder'].'/'.$filename;
+                            $data['path'] = 'perumbi/'.$validate['id_heder'].'/'.$filename;
+                        }
+
+                        $simpan = Userrinci::create($data);
+                    DB::commit();
+                    $result = Userrinci::find($simpan->id);
+                    return new JsonResource([
+                        'status' => true,
+                        'message' => 'Data berhasil disimpan',
+                        'data' => $result,
+                    ], 200);
+                }
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                ], 500);
+            }
         }
     }
 
