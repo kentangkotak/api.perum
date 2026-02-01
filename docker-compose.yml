@@ -33,19 +33,19 @@ services:
     networks:
       - laravel
 
-  echo-server:
-    image: node:18-alpine
-    container_name: laravel_echo_server
-    working_dir: /app
-    volumes:
-      - ./:/app
-    command: sh -c "npm install -g laravel-echo-server && laravel-echo-server start --config=/app/echo-server.json"
-    ports:
-      - "6001:6001"
-    depends_on:
-      - redis
-    networks:
-      - laravel
+#   echo-server:
+#     image: node:18-alpine
+#     container_name: laravel_echo_server
+#     working_dir: /app
+#     volumes:
+#       - ./:/app
+#     command: sh -c "npm install -g laravel-echo-server && laravel-echo-server start --config=/app/echo-server.json"
+#     ports:
+#       - "6001:6001"
+#     depends_on:
+#       - redis
+#     networks:
+#       - laravel
 
 networks:
   laravel:

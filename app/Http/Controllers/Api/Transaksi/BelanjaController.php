@@ -73,7 +73,7 @@ class BelanjaController extends Controller
                         'jenisbelanja' => $validate['jenisbelanja'],
                         'keterangan' => $validate['keterangan'],
                         'jenispembayaran' => $validate['jenispembayaran'],
-                        'totalbelanja' => $validate['totalbelanja'],
+                        'totalbelanja' => $validate['totalbelanja'] + $validate['subtotal'],
                         'user' => $user->id,
                     ]
                 );
