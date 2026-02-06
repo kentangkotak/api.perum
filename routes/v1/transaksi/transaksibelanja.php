@@ -9,4 +9,5 @@ Route::group([
 ], function () {
     Route::get('/get-belanja', [BelanjaController::class, 'index']);
     Route::post('/simpan', [BelanjaController::class, 'store']);
+    Route::post('/hapus-rincian-belanja', [BelanjaController::class, 'hapusrincianbelanja']);
 });

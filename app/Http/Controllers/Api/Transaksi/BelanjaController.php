@@ -116,4 +116,33 @@ class BelanjaController extends Controller
             ->get();
         return $data;
     }
+
+    public function hapusrincianbelanja(Request $request)
+    {
+        $id = $request->id;
+        $notrans = $request->notrans;
+        $totalbelanja = $request->totalbelanja;
+
+      try{
+        DB::beginTransaction();
+            $hapus = BelanjaR::where('id', $id)->delete();
+            $update = BelanjaH::where('notrans', $notrans)->first();
+            $update->totalbelanja = $totalbelanja;
+            $update->save();
+        DB::commit();
+            $data = self::getbelanjabynotrans($notrans);
+             return new JsonResponse([
+                'status' => true,
+                'message' => 'Data berhasil dihapus',
+                'data' => $data,
+            ], 200);
+      } catch (\Throwable $th) {
+            DB::rollBack();
+            return new JsonResponse([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
 }
