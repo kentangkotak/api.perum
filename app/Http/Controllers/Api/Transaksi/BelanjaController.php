@@ -25,7 +25,8 @@ class BelanjaController extends Controller
             ->whereYear('belanjaH.tgl', request('tahun'))
             ->when(request('q'), function ($q) {
                 $q->where('belanjaH.notrans', 'like', '%' . request('q') . '%')
-                    ->orWhere('belanjaR.keterangan', 'like', '%' . request('q') . '%');
+                    ->orWhere('belanjaH.jenisbelanja', 'like', '%' . request('q') . '%')
+                    ->orWhere('belanjaH.keterangan', 'like', '%' . request('q') . '%');
             })
             ->orderBy('belanjaH.tgl', 'desc')
             ->get();
@@ -44,6 +45,7 @@ class BelanjaController extends Controller
             'namabarang' => 'required',
             'jumlah' => 'required',
             'harga' => 'required',
+            'satuan' => 'required',
             'subtotal' => 'required',
         ],[
             'tgl.required' => 'Tanggal Harus Di isi.',
@@ -52,6 +54,7 @@ class BelanjaController extends Controller
             'totalbelanja.required' => 'Total Belanja Harus Di isi.',
             'namabarang.required' => 'Nama Barang Harus Di isi.',
             'jumlah.required' => 'Jumlah Harus Di isi.',
+            'satuan.required' => 'Satuan Harus Di isi.',
             'harga.required' => 'Harga Harus Di isi.',
             'subtotal.required' => 'Subtotal Harus Di isi.',
         ]);
@@ -82,6 +85,7 @@ class BelanjaController extends Controller
                         'notrans' => $notrans,
                         'namabarang' => $validate['namabarang'],
                         'jumlah' => $validate['jumlah'],
+                        'satuan' => $validate['satuan'],
                         'harga' => $validate['harga'],
                         'subtotal' => $validate['subtotal'],
                         'user' => $user->id,
