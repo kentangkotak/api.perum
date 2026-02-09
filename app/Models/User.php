@@ -56,6 +56,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Userrinci::class, 'id_heder', 'id');
     }
 
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
     public function getJWTCustomClaims()
     {
         return [];

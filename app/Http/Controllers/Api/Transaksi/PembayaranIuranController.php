@@ -3,14 +3,25 @@
 namespace App\Http\Controllers\Api\Transaksi;
 
 use App\Http\Controllers\Controller;
+use App\Models\FcmToken;
 use App\Models\Transaksi\Pembayaraniuran;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PembayaranIuranController extends Controller
 {
+    protected $notifService;
+
+    // Masukkan service ke constructor
+    public function __construct(NotificationService $notifService)
+    {
+        $this->notifService = $notifService;
+    }
+
     public function index()
     {
         $data = Pembayaraniuran::select('iuran.*','users.name as nama')
@@ -79,6 +90,19 @@ class PembayaranIuranController extends Controller
                     ]
                 );
             DB::commit();
+            $tokens = FcmToken::distinct()->pluck('token')->toArray();
+            if (!empty($tokens)) {
+                $res = $this->notifService->sendToLaravelNotif(
+                    $tokens,
+                    "Pembayaran Iuran Berhasil", // Title
+                    "Iuran bulan {$validate['bulan']} tahun {$validate['tahun']} telah diterima.", // Body
+                    [
+                        'notrans' => $notrans,
+                        'type' => 'pembayaran_iuran'
+                    ] // Data tambahan
+                );
+                Log::info('Respon dari Laravel 12: ', [$res]);
+            }
             $data = self::getlistbynotrans($notrans);
             return new JsonResponse([
                 'status' => true,

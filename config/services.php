@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'notif_server' => [
+        'url' => env('NOTIF_SERVER_URL'),
+        'key' => env('NOTIF_SERVER_KEY'),
+    ],
+
 ];
