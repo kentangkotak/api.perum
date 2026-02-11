@@ -95,7 +95,7 @@ class PembayaranIuranController extends Controller
                 $res = $this->notifService->sendToLaravelNotif(
                     $tokens,
                     "Pembayaran Iuran Berhasil", // Title
-                    "Iuran {$user->name} bulan {$validate['bulan']} tahun {$validate['tahun']} telah diterima.", // Body
+                    "Iuran bulan {$validate['bulan']} tahun {$validate['tahun']} telah diterima.", // Body
                     [
                         'notrans' => $notrans,
                         'type' => 'pembayaran_iuran'
