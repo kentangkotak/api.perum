@@ -46,6 +46,7 @@ class PembayaranIuranController extends Controller
             'jumlah' => 'required',
             'carabayar' => 'required',
             'keterangan' => 'nullable',
+            'nama' => 'nullable',
         ],[
             'warga_id.required' => 'Warga Harus Di isi.',
             'bulan.required' => 'Bulan Harus Di isi.',
@@ -72,6 +73,7 @@ class PembayaranIuranController extends Controller
             $notrans = $request->notrans;
         }
         $user = Auth::user();
+
         try {
             DB::beginTransaction();
                 $simpan = Pembayaraniuran::updateOrCreate(
@@ -95,7 +97,7 @@ class PembayaranIuranController extends Controller
                 $res = $this->notifService->sendToLaravelNotif(
                     $tokens,
                     "Pembayaran Iuran Berhasil", // Title
-                    "Iuran bulan {$validate['bulan']} tahun {$validate['tahun']} telah diterima.", // Body
+                    "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.", // Body
                     [
                         'notrans' => $notrans,
                         'type' => 'pembayaran_iuran'
