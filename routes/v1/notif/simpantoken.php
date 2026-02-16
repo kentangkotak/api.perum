@@ -15,6 +15,8 @@ Route::group([
     Route::get('/unread-count', [SimpantokenControoler::class, 'countUnread']);
     Route::get('/read-all', [SimpantokenControoler::class, 'readall']);
 
+    Route::get('/notifications/{id}', [SimpantokenControoler::class, 'show']);
+
 
 
 });

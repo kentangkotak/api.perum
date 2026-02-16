@@ -94,4 +94,13 @@ class SimpantokenControoler extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+       $notif = Notifikasi::find($id);
+        if (!$notif) {
+            return response()->json(['status' => false, 'message' => 'Notif tidak ditemukan'], 404);
+        }
+        return response()->json($notif);
+    }
+
 }

@@ -26,6 +26,7 @@ class simpannotif extends Controller
             ];
         }
         Notifikasi::insert($dataInsert);
+
     }
 
 }
