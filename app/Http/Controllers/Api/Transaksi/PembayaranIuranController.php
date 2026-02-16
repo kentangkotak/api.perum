@@ -97,6 +97,7 @@ class PembayaranIuranController extends Controller
             $tokens = FcmToken::distinct()->pluck('token')->toArray();
             $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
             $respnotif =NotifSimpannotif::simpannotifx($id_penerima,$user->id,$validate,$notrans);
+            // return $respnotif['id'];
 
 
             // Simpan ke tabel notifications
@@ -125,7 +126,7 @@ class PembayaranIuranController extends Controller
                     "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.", // Body
                     [
                         'notrans' => $notrans,
-                        // 'id' => $respnotif->id,
+                        'id' => (string)$respnotif['id'],
                         'type' => 'pembayaran_iuran'
                     ] // Data tambahan
                 );
