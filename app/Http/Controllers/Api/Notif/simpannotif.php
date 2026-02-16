@@ -7,7 +7,7 @@ use App\Models\Notifikasi;
 
 class simpannotif extends Controller
 {
-    public static function simpannotifx($id_penerima,$tokens,$user,$validate,$notrans){
+    public static function simpannotifx($id_penerima,$user,$validate,$notrans){
 
         $dataInsert = [];
         foreach ($id_penerima as $uid) {

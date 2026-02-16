@@ -96,7 +96,7 @@ class PembayaranIuranController extends Controller
             DB::commit();
             $tokens = FcmToken::distinct()->pluck('token')->toArray();
             $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
-            NotifSimpannotif::simpannotifx($id_penerima,$tokens,$user->id,$validate,$notrans);
+            NotifSimpannotif::simpannotifx($id_penerima,$user->id,$validate,$notrans);
 
             // Simpan ke tabel notifications
             // $dataInsert = [];
