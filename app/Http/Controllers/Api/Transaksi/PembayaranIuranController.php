@@ -126,7 +126,7 @@ class PembayaranIuranController extends Controller
                     "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.", // Body
                     [
                         'notrans' => $notrans,
-                        'id' => (string)$respnotif['id'],
+                        // 'id' => (string)$respnotif['id'],
                         'type' => 'pembayaran_iuran'
                     ] // Data tambahan
                 );
