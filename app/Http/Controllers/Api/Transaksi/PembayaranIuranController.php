@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api\Transaksi;
 
+use App\Helpers\simpannotif\simpannotif;
+use App\Http\Controllers\Api\Notif\simpannotif as NotifSimpannotif;
 use App\Http\Controllers\Controller;
 use App\Models\FcmToken;
+use App\Models\Notifikasi;
 use App\Models\Transaksi\Pembayaraniuran;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
@@ -73,7 +76,6 @@ class PembayaranIuranController extends Controller
             $notrans = $request->notrans;
         }
         $user = Auth::user();
-
         try {
             DB::beginTransaction();
                 $simpan = Pembayaraniuran::updateOrCreate(
@@ -88,11 +90,33 @@ class PembayaranIuranController extends Controller
                         'nominal' => $validate['jumlah'],
                         'cara_bayar' => $validate['carabayar'],
                         'keterangan' => $validate['keterangan'],
-                        'user' => $user->id,
+                        'users' => $user->id,
                     ]
                 );
             DB::commit();
             $tokens = FcmToken::distinct()->pluck('token')->toArray();
+            $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
+            NotifSimpannotif::simpannotifx($id_penerima,$tokens,$user->id,$validate,$notrans);
+
+            // Simpan ke tabel notifications
+            // $dataInsert = [];
+            // foreach ($id_penerima as $uid) {
+            //      $dataInsert[] = [
+            //         'user_id' => $user->id,
+            //         'user_penerima' => $uid->user_id,
+            //         'title' => 'Pembayaran Iuran Berhasil',
+            //         'message' => "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.",
+            //         'type' => 'pembayaran_iuran',
+            //         'data_json' => json_encode([
+            //             'notrans' => $notrans
+            //         ]),
+            //         'is_read' => 0,
+            //         'created_at' => now(),
+            //         'updated_at' => now()
+            //     ];
+            // }
+            // Notifikasi::insert($dataInsert);
+
             if (!empty($tokens)) {
                 $res = $this->notifService->sendToLaravelNotif(
                     $tokens,
