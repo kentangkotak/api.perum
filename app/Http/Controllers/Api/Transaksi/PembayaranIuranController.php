@@ -78,21 +78,21 @@ class PembayaranIuranController extends Controller
         $user = Auth::user();
         try {
             DB::beginTransaction();
-                // $simpan = Pembayaraniuran::updateOrCreate(
-                //     [
-                //         'notrans' => $notrans,
-                //     ],
-                //     [
-                //         'warga_id' => $validate['warga_id'],
-                //         'bulan' => $validate['bulan'],
-                //         'tahun' => $validate['tahun'],
-                //         'jeniskewargaan' => $validate['jeniskewargaan'],
-                //         'nominal' => $validate['jumlah'],
-                //         'cara_bayar' => $validate['carabayar'],
-                //         'keterangan' => $validate['keterangan'],
-                //         'users' => $user->id,
-                //     ]
-                // );
+                $simpan = Pembayaraniuran::updateOrCreate(
+                    [
+                        'notrans' => $notrans,
+                    ],
+                    [
+                        'warga_id' => $validate['warga_id'],
+                        'bulan' => $validate['bulan'],
+                        'tahun' => $validate['tahun'],
+                        'jeniskewargaan' => $validate['jeniskewargaan'],
+                        'nominal' => $validate['jumlah'],
+                        'cara_bayar' => $validate['carabayar'],
+                        'keterangan' => $validate['keterangan'],
+                        'users' => $user->id,
+                    ]
+                );
             DB::commit();
             $tokens = FcmToken::distinct()->pluck('token')->toArray();
             $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
