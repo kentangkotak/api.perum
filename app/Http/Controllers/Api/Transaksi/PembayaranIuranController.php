@@ -6,25 +6,14 @@ use App\Helpers\simpannotif\simpannotif;
 use App\Http\Controllers\Api\Notif\simpannotif as NotifSimpannotif;
 use App\Http\Controllers\Controller;
 use App\Models\FcmToken;
-use App\Models\Notifikasi;
 use App\Models\Transaksi\Pembayaraniuran;
-use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class PembayaranIuranController extends Controller
 {
-    protected $notifService;
-
-    // Masukkan service ke constructor
-    public function __construct(NotificationService $notifService)
-    {
-        $this->notifService = $notifService;
-    }
-
     public function index()
     {
         $data = Pembayaraniuran::select('iuran.*','users.name as nama')
@@ -94,9 +83,12 @@ class PembayaranIuranController extends Controller
                     ]
                 );
             DB::commit();
+            $type = 'pembayaran_iuran';
+            $title = 'Pembayaran Iuran Berhasil';
+            $message = "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.";
             $tokens = FcmToken::distinct()->pluck('token')->toArray();
             $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
-            $respnotif =NotifSimpannotif::simpannotifx($id_penerima,$user->id,$validate,$notrans);
+            $respnotif =NotifSimpannotif::simpannotifx($title,$message,$type,$id_penerima,$user->id,$notrans);
             // return $respnotif['id'];
 
 
@@ -119,19 +111,20 @@ class PembayaranIuranController extends Controller
             // }
             // Notifikasi::insert($dataInsert);
 
-            if (!empty($tokens)) {
-                $res = $this->notifService->sendToLaravelNotif(
-                    $tokens,
-                    "Pembayaran Iuran Berhasil", // Title
-                    "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.", // Body
-                    [
-                        'notrans' => $notrans,
-                        // 'id' => (string)$respnotif['id'],
-                        'type' => 'pembayaran_iuran'
-                    ] // Data tambahan
-                );
-                // Log::info('Respon dari Laravel 12: ', [$res]);
-            }
+            // if (!empty($tokens)) {
+            //     $res = $this->notifService->sendToLaravelNotif(
+            //         $tokens,
+            //         "Pembayaran Iuran Berhasil", // Title
+            //         "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.", // Body
+            //         [
+            //             'notrans' => $notrans,
+            //             // 'id' => (string)$respnotif['id'],
+            //             'type' => 'pembayaran_iuran'
+            //         ] // Data tambahan
+            //     );
+            //     // Log::info('Respon dari Laravel 12: ', [$res]);
+            // }
+            NotifSimpannotif::kirimnotifx($tokens,$title,$message,$type,$notrans);
             $data = self::getlistbynotrans($notrans);
             return new JsonResponse([
                 'status' => true,

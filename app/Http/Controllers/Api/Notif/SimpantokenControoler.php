@@ -7,6 +7,9 @@ use App\Models\FcmToken;
 use App\Models\Notifikasi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Api\Notif\simpannotif as NotifSimpannotif;
+use Illuminate\Support\Facades\Auth;
 
 class SimpantokenControoler extends Controller
 {
@@ -33,7 +36,8 @@ class SimpantokenControoler extends Controller
         ]);
     }
 
-    public function fcmtokens(){
+    public function fcmtokens()
+    {
         $tokens = FcmToken::all();
 
         return new JsonResponse([
@@ -101,6 +105,78 @@ class SimpantokenControoler extends Controller
             return response()->json(['status' => false, 'message' => 'Notif tidak ditemukan'], 404);
         }
         return response()->json($notif);
+    }
+
+    public function listtoken()
+    {
+        $tokens = FcmToken::with('user')->get();
+
+        return new JsonResponse([
+            'status' => true,
+            'data' => $tokens
+        ]);
+    }
+
+    public function hapusalltoken()
+    {
+        DB::statement('CALL hapus_all_token()');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data berhasil dihapus'
+        ]);
+    }
+
+    public function notificationsall()
+    {
+        $data = Notifikasi::with([
+            'user',
+            'userPenerima'
+        ])->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
+    }
+
+    public function kirimnotifikasiall()
+    {
+
+        $type = 'test_notifikasi';
+        $title = 'Test Notifikasi';
+
+        $message = "Test Notifikasi,jika anda menerima notif ini,berrti server notifikasi sedang melakukan proses maintenance,mohon maaf atas ketidaknyamanannya.";
+        $user = Auth::user();
+        $notrans = 'COBA-' . date('YmdHis');
+
+        $tokens = FcmToken::distinct()->pluck('token')->toArray();
+        $id_penerima = FcmToken::distinct()->pluck('user_id')->toArray();
+
+        $respnotif =NotifSimpannotif::simpannotifx($title,$message,$type,$id_penerima,$user->id,$notrans);
+
+        NotifSimpannotif::kirimnotifx($tokens,$title,$message,$type,$notrans);
+        // return $respnotif;
+        if($respnotif){
+            return response()->json([
+                'status' => true,
+                'message' => 'Notifikasi berhasil dikirim'
+            ]);
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'Notifikasi gagal dikirim'
+            ]);
+        }
+    }
+    public function hapusnotificationsall()
+    {
+        DB::statement('CALL hapus_all_notifikasi()');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data berhasil dihapus'
+        ]);
     }
 
 }

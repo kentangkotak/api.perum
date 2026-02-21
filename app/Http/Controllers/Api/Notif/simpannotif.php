@@ -4,19 +4,27 @@ namespace App\Http\Controllers\Api\Notif;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
+use App\Services\NotificationService;
 
 class simpannotif extends Controller
 {
-    public static function simpannotifx($id_penerima,$user,$validate,$notrans){
+    protected $notifService;
 
+    // Masukkan service ke constructor
+    public function __construct(NotificationService $notifService)
+    {
+        $this->notifService = $notifService;
+    }
+
+    public static function simpannotifx($title,$message,$type,$id_penerima,$user,$notrans){
         $dataInsert = [];
         foreach ($id_penerima as $uid) {
                 $dataInsert[] = [
                 'user_id' => $user,
                 'user_penerima' => $uid,
-                'title' => 'Pembayaran Iuran Berhasil',
-                'message' => "Diterima Iuran dari {$validate['nama']} untuk bulan {$validate['bulan']} tahun {$validate['tahun']}.",
-                'type' => 'pembayaran_iuran',
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
                 'data_json' => json_encode([
                     'notrans' => $notrans
                 ]),
@@ -26,7 +34,27 @@ class simpannotif extends Controller
             ];
         }
         Notifikasi::insert($dataInsert);
+        return true;
+    }
 
+    public static function kirimnotifx(
+        $tokens,
+        $title,
+        $message,
+        $type,
+        $notrans
+    ) {
+        $service = app(NotificationService::class);
+
+        return $service->sendToLaravelNotif(
+            $tokens,
+            $title,
+            $message,
+            [
+                'notrans' => $notrans,
+                'type' => $type
+            ]
+        );
     }
 
 }

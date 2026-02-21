@@ -17,6 +17,16 @@ Route::group([
 
     Route::get('/notifications/{id}', [SimpantokenControoler::class, 'show']);
 
+    Route::get('/list-token', [SimpantokenControoler::class, 'listtoken']);
+
+    Route::get('/hapus-all-token', [SimpantokenControoler::class, 'hapusalltoken']);
+
+    Route::get('/notifications-all', [SimpantokenControoler::class, 'notificationsall']);
+    Route::get('/kirim-notifikasi-all', [SimpantokenControoler::class, 'kirimnotifikasiall']);
+    Route::get('/hapus-all-notifikasi-all', [SimpantokenControoler::class, 'hapusnotificationsall']);
+
+
+
 
 
 });

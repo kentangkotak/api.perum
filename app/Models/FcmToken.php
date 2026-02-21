@@ -17,4 +17,9 @@ class FcmToken extends Model
     ];
     protected $table = 'fcm_tokens';
     protected $guarded = ['id'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }
